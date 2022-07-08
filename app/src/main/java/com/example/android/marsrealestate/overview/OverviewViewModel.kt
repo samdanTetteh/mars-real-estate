@@ -40,10 +40,10 @@ class OverviewViewModel : ViewModel() {
         get() = _status
 
 
-    private val _property = MutableLiveData<MarsProperty>()
+    private val _properties = MutableLiveData<List<MarsProperty>>()
 
-    val property : MutableLiveData<MarsProperty>
-        get() = _property
+    val properties : MutableLiveData<List<MarsProperty>>
+        get() = _properties
 
 
     private var viewModelJob = Job()
@@ -66,7 +66,7 @@ class OverviewViewModel : ViewModel() {
                 val listResults = getPropertiesDeferred.await()
 
                 if (listResults.isNotEmpty()) {
-                    _property.value = listResults[0]
+                    _properties.value = listResults
                 }
                 _status.value = "Success: ${listResults.size} Mars properties retrieved"
             }catch (e: Exception) {
