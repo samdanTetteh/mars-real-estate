@@ -33,10 +33,10 @@ import kotlinx.coroutines.launch
 class OverviewViewModel : ViewModel() {
 
     // The internal MutableLiveData String that stores the status of the most recent request
-    private val _status = MutableLiveData<String>()
+    private val _status = MutableLiveData<MarApiStatus>()
 
     // The external immutable LiveData for the request status String
-    val status: LiveData<String>
+    val status: LiveData<MarApiStatus>
         get() = _status
 
 
@@ -62,19 +62,21 @@ class OverviewViewModel : ViewModel() {
     private fun getMarsRealEstateProperties() {
         coroutineScope.launch {
             try {
+                _status.value = MarApiStatus.LOADING
                 var getPropertiesDeferred = MarsApi.retrofitService.getProperties()
                 val listResults = getPropertiesDeferred.await()
 
                 if (listResults.isNotEmpty()) {
+                    _status.value = MarApiStatus.DONE
                     _properties.value = listResults
                 }
-                _status.value = "Success: ${listResults.size} Mars properties retrieved"
+
             }catch (e: Exception) {
-                _status.value = "Failure ${e.message}"
+                _status.value = MarApiStatus.ERROR
+                _properties.value = emptyList()
             }
 
         }
-        _status.value = "Loading..."
     }
 
 
@@ -82,4 +84,10 @@ class OverviewViewModel : ViewModel() {
         super.onCleared()
         viewModelJob.cancel()
     }
+}
+
+enum class MarApiStatus {
+     LOADING,
+     ERROR,
+     DONE
 }
